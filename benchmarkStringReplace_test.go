@@ -11,16 +11,18 @@ import (
 	Result benchmark:
 
 	go version go1.11 linux/amd64
-	
+
 	run using: go test -bench=.
 
-	BenchmarkRegexpBytesTable1-8    	  100000	     12680 ns/op
-	BenchmarkRegexpStringTable1-8   	  100000	     12666 ns/op
-	BenchmarkStringsTable1-8        	  100000	     16597 ns/op
-	
-	BenchmarkRegexpBytesTable2-8    	  200000	      9290 ns/op
-	BenchmarkRegexpStringTable2-8   	  200000	      9108 ns/op
-	BenchmarkStringsTable2-8        	  200000	      6360 ns/op
+BenchmarkRegexpBytesTable1-8    	  100000	     12615 ns/op
+BenchmarkRegexpStringTable1-8   	  100000	     12323 ns/op
+BenchmarkStringsTable1-8        	  100000	     16331 ns/op
+BenchmarkBytesTable1-8          	  100000	     17399 ns/op
+
+BenchmarkRegexpBytesTable2-8    	  200000	      9205 ns/op
+BenchmarkRegexpStringTable2-8   	  200000	      9323 ns/op
+BenchmarkStringsTable2-8        	  200000	      6492 ns/op
+BenchmarkBytesTable2-8          	  200000	      7345 ns/op
 
 */
 
@@ -49,6 +51,14 @@ func BenchmarkStringsTable1(b *testing.B) {
 	}
 }
 
+func BenchmarkBytesTable1(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for _, value := range tableTest_1 {
+			replaceBytes(value.dataBytes)
+		}
+	}
+}
+
 func BenchmarkRegexpBytesTable2(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, value := range tableTest_2 {
@@ -69,6 +79,14 @@ func BenchmarkStringsTable2(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, value := range tableTest_2 {
 			replaceStrings(value.dataString)
+		}
+	}
+}
+
+func BenchmarkBytesTable2(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for _, value := range tableTest_2 {
+			replaceBytes(value.dataBytes)
 		}
 	}
 }
@@ -98,7 +116,14 @@ func TestStrings(t *testing.T) {
 			t.Errorf("Failed test pos [%d] expected [%s] result [%s]", key, value.result, result)
 		}
 	}
+}
 
+func TestBytes(t *testing.T) {
+	for key, value := range tableTest_1 {
+		if result := replaceBytes(value.dataBytes); result != value.result {
+			t.Errorf("Failed test pos [%d] expected [%s] result [%s]", key, value.result, result)
+		}
+	}
 }
 
 var (
@@ -153,4 +178,7 @@ func replaceRegexpString(s string) string {
 
 func replaceStrings(s string) string {
 	return strings.Join(strings.Fields(s), " ")
+}
+func replaceBytes(s []byte) string {
+	return string(bytes.Join(bytes.Fields(s), []byte(" ")))
 }
